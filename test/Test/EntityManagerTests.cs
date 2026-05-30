@@ -5,16 +5,16 @@ namespace UnitTests
 {
     public class EntityManagerTests
     {
-        private struct Position { public float X, Y; }
-        private struct Velocity { public float X, Y; }
-        private struct Health { public int Value; }
+        private struct PositionComponent : IComponent { public float X, Y; }
+        private struct VelocityComponent : IComponent { public float X, Y; }
+        private struct HealthComponent : IComponent { public int Value; }
 
         private EntityManager CreateManager(int maxEntities = 16)
         {
             var componentRegistry = new ComponentRegistry();
-            componentRegistry.Register<Position>();
-            componentRegistry.Register<Velocity>();
-            componentRegistry.Register<Health>();
+            componentRegistry.Register<PositionComponent>();
+            componentRegistry.Register<VelocityComponent>();
+            componentRegistry.Register<HealthComponent>();
             return new EntityManager(componentRegistry, maxEntities);
         }
 
@@ -36,12 +36,12 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
             manager.Destroy(id);
             // After destroy, entity should not have any components
-            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<Position>(id));
-            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<Velocity>(id));
+            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<PositionComponent>(id));
+            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<VelocityComponent>(id));
             Assert.False(manager.IsAlive(id));
             Assert.Throws<EntityNotFoundException>(() => manager.GetSignature(id));
         }
@@ -67,9 +67,9 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            var pos = new Position { X = 1, Y = 2 };
+            var pos = new PositionComponent { X = 1, Y = 2 };
             manager.AddComponent(id, pos);
-            var result = manager.GetComponent<Position>(id);
+            var result = manager.GetComponent<PositionComponent>(id);
             Assert.Equal(pos.X, result.X);
             Assert.Equal(pos.Y, result.Y);
         }
@@ -79,8 +79,8 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            Assert.Throws<ComponentAlreadyExistsException>(() => manager.AddComponent(id, new Position { X = 3, Y = 4 }));
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            Assert.Throws<ComponentAlreadyExistsException>(() => manager.AddComponent(id, new PositionComponent { X = 3, Y = 4 }));
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace UnitTests
             var manager = CreateManager();
             int id = manager.Create();
             manager.Destroy(id);
-            Assert.Throws<EntityNotFoundException>(() => manager.AddComponent(id, new Position { X = 1, Y = 2 }));
+            Assert.Throws<EntityNotFoundException>(() => manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 }));
         }
 
         [Fact]
@@ -98,7 +98,7 @@ namespace UnitTests
             var manager = CreateManager();
             int id = manager.Create();
             manager.Destroy(id);
-            Assert.Throws<EntityNotFoundException>(() => manager.UpdateComponent(id, new Position { X = 1, Y = 2 }));
+            Assert.Throws<EntityNotFoundException>(() => manager.UpdateComponent(id, new PositionComponent { X = 1, Y = 2 }));
         }
 
         [Fact]
@@ -107,7 +107,7 @@ namespace UnitTests
             var manager = CreateManager();
             int id = manager.Create();
             manager.Destroy(id);
-            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<Position>(id));
+            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<PositionComponent>(id));
         }
 
         [Fact]
@@ -133,10 +133,10 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
-            var pos = manager.GetComponent<Position>(id);
-            var vel = manager.GetComponent<Velocity>(id);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
+            var pos = manager.GetComponent<PositionComponent>(id);
+            var vel = manager.GetComponent<VelocityComponent>(id);
             Assert.Equal(1, pos.X);
             Assert.Equal(2, pos.Y);
             Assert.Equal(3, vel.X);
@@ -148,11 +148,11 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            var pos1 = manager.GetComponent<Position>(id);
-            manager.AddComponent(id, new Velocity { X = 5, Y = 6 });
-            var pos2 = manager.GetComponent<Position>(id);
-            var vel = manager.GetComponent<Velocity>(id);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            var pos1 = manager.GetComponent<PositionComponent>(id);
+            manager.AddComponent(id, new VelocityComponent { X = 5, Y = 6 });
+            var pos2 = manager.GetComponent<PositionComponent>(id);
+            var vel = manager.GetComponent<VelocityComponent>(id);
             Assert.Equal(pos1.X, pos2.X);
             Assert.Equal(pos1.Y, pos2.Y);
             Assert.Equal(5, vel.X);
@@ -177,11 +177,11 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
             manager.Destroy(id);
             Assert.False(manager.IsAlive(id));
             // Should throw because the entity and its components are removed
-            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<Position>(id));
+            Assert.Throws<EntityNotFoundException>(() => manager.GetComponent<PositionComponent>(id));
             Assert.Throws<EntityNotFoundException>(() => manager.GetSignature(id));
         }
 
@@ -190,9 +190,9 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.RemoveComponent<Position>(id);
-            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<Position>(id));
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.RemoveComponent<PositionComponent>(id);
+            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<PositionComponent>(id));
             Assert.True(manager.IsAlive(id));
         }
 
@@ -201,11 +201,11 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
-            manager.RemoveComponent<Position>(id);
-            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<Position>(id));
-            var vel = manager.GetComponent<Velocity>(id);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
+            manager.RemoveComponent<PositionComponent>(id);
+            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<PositionComponent>(id));
+            var vel = manager.GetComponent<VelocityComponent>(id);
             Assert.Equal(3, vel.X);
             Assert.Equal(4, vel.Y);
         }
@@ -215,10 +215,10 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.RemoveComponent<Position>(id);
-            manager.AddComponent(id, new Position { X = 5, Y = 6 });
-            var pos = manager.GetComponent<Position>(id);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.RemoveComponent<PositionComponent>(id);
+            manager.AddComponent(id, new PositionComponent { X = 5, Y = 6 });
+            var pos = manager.GetComponent<PositionComponent>(id);
             Assert.Equal(5, pos.X);
             Assert.Equal(6, pos.Y);
         }
@@ -228,7 +228,7 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            Assert.Throws<ComponentNotFoundException>(() => manager.RemoveComponent<Position>(id));
+            Assert.Throws<ComponentNotFoundException>(() => manager.RemoveComponent<PositionComponent>(id));
         }
 
         [Fact]
@@ -236,9 +236,9 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<Velocity>(id));
-            Assert.Throws<ComponentNotFoundException>(() => manager.RemoveComponent<Velocity>(id));
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<VelocityComponent>(id));
+            Assert.Throws<ComponentNotFoundException>(() => manager.RemoveComponent<VelocityComponent>(id));
         }
 
         [Fact]
@@ -246,16 +246,16 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
-            manager.AddComponent(id, new Health { Value = 100 });
-            manager.RemoveComponent<Velocity>(id);
-            var pos = manager.GetComponent<Position>(id);
-            var health = manager.GetComponent<Health>(id);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
+            manager.AddComponent(id, new HealthComponent { Value = 100 });
+            manager.RemoveComponent<VelocityComponent>(id);
+            var pos = manager.GetComponent<PositionComponent>(id);
+            var health = manager.GetComponent<HealthComponent>(id);
             Assert.Equal(1, pos.X);
             Assert.Equal(2, pos.Y);
             Assert.Equal(100, health.Value);
-            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<Velocity>(id));
+            Assert.Throws<ComponentNotFoundException>(() => manager.GetComponent<VelocityComponent>(id));
         }
 
         [Fact]
@@ -263,15 +263,15 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
-            ulong signatureWithBoth = manager.GetSignature(id);
-            manager.RemoveComponent<Velocity>(id);
-            ulong signatureWithPosition = manager.GetSignature(id);
-            Assert.NotEqual(signatureWithBoth, signatureWithPosition);
-            manager.RemoveComponent<Position>(id);
-            ulong signatureWithNone = manager.GetSignature(id);
-            Assert.NotEqual(signatureWithPosition, signatureWithNone);
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
+            var signatureWithBoth = manager.GetSignature(id);
+            manager.RemoveComponent<VelocityComponent>(id);
+            var signatureWithPositionComponent = manager.GetSignature(id);
+            Assert.NotEqual(signatureWithBoth, signatureWithPositionComponent);
+            manager.RemoveComponent<PositionComponent>(id);
+            var signatureWithNone = manager.GetSignature(id);
+            Assert.NotEqual(signatureWithPositionComponent, signatureWithNone);
         }
 
         [Fact]
@@ -279,9 +279,9 @@ namespace UnitTests
         {
             var manager = CreateManager();
             int id = manager.Create();
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            Assert.True(manager.HasComponent<Position>(id));
-            Assert.False(manager.HasComponent<Velocity>(id));
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            Assert.True(manager.HasComponent<PositionComponent>(id));
+            Assert.False(manager.HasComponent<VelocityComponent>(id));
         }
 
         [Fact]
@@ -290,7 +290,7 @@ namespace UnitTests
             var manager = CreateManager();
             int id = manager.Create();
             manager.Destroy(id);
-            Assert.Throws<EntityNotFoundException>(() => manager.HasComponent<Position>(id));
+            Assert.Throws<EntityNotFoundException>(() => manager.HasComponent<PositionComponent>(id));
         }
 
         [Fact]
@@ -299,13 +299,13 @@ namespace UnitTests
             var manager = CreateManager();
             int id = manager.Create();
             // No components yet
-            Assert.Equal(0UL, manager.GetSignature(id));
-            manager.AddComponent(id, new Position { X = 1, Y = 2 });
-            ulong sigWithPosition = manager.GetSignature(id);
-            Assert.NotEqual(0UL, sigWithPosition);
-            manager.AddComponent(id, new Velocity { X = 3, Y = 4 });
-            ulong sigWithBoth = manager.GetSignature(id);
-            Assert.NotEqual(sigWithPosition, sigWithBoth);
+            Assert.Equal(Bit256.Zero, manager.GetSignature(id));
+            manager.AddComponent(id, new PositionComponent { X = 1, Y = 2 });
+            var sigWithPositionComponent = manager.GetSignature(id);
+            Assert.NotEqual(Bit256.Zero, sigWithPositionComponent);
+            manager.AddComponent(id, new VelocityComponent { X = 3, Y = 4 });
+            var sigWithBoth = manager.GetSignature(id);
+            Assert.NotEqual(sigWithPositionComponent, sigWithBoth);
         }
 
         [Fact]

@@ -29,12 +29,12 @@ internal class EntityManager
     /// <summary>
     /// Maps entity IDs to their current component signature (bitmask).
     /// </summary>
-    private Dictionary<int, ulong> _signatureByEntityId;
+    private Dictionary<int, Bit256> _signatureByEntityId;
 
     /// <summary>
     /// Maps component signatures (bitmask) to their corresponding archetype.
     /// </summary>
-    private Dictionary<ulong, Archetype> _archetypeBySignature;
+    private Dictionary<Bit256, Archetype> _archetypeBySignature;
 
     /// <summary>
     /// Registry for component type flags and metadata.
@@ -52,8 +52,8 @@ internal class EntityManager
         _maxEntities = maxEntities;
         _freeIds = new Queue<int>(maxEntities);
         _activeIds = new HashSet<int>();
-        _signatureByEntityId = new Dictionary<int, ulong>();
-        _archetypeBySignature = new Dictionary<ulong, Archetype>();
+        _signatureByEntityId = new Dictionary<int, Bit256>();
+        _archetypeBySignature = new Dictionary<Bit256, Archetype>();
 
         for (int i = 0; i < maxEntities; ++i)
         {
@@ -77,7 +77,7 @@ internal class EntityManager
 
         int id = _freeIds.Dequeue();
         _activeIds.Add(id);
-        _signatureByEntityId[id] = 0;
+        _signatureByEntityId[id] = Bit256.Zero;
 
         return id;
     }
@@ -98,7 +98,7 @@ internal class EntityManager
 
         var oldSignature = _signatureByEntityId[id];
 
-        if (oldSignature != 0)
+        if (oldSignature != Bit256.Zero)
         {
             var oldArchetype = _archetypeBySignature[oldSignature];
 
@@ -132,7 +132,7 @@ internal class EntityManager
     /// </summary>
     /// <typeparam name="T1">The component type to query for.</typeparam>
     /// <returns>An enumerable of entity IDs.</returns>
-    public IEnumerable<int> GetEntities<T1>() where T1 : struct
+    public IEnumerable<int> GetEntities<T1>() where T1 : struct, IComponent
     {
         var componentFlag = _componentRegistry.GetFlag<T1>();
         foreach (var item in _archetypeBySignature)
@@ -157,7 +157,7 @@ internal class EntityManager
     /// <typeparam name="T1">The first component type to query for.</typeparam>
     /// <typeparam name="T2">The second component type to query for.</typeparam>
     /// <returns>An enumerable of entity IDs.</returns>
-    public IEnumerable<int> GetEntities<T1, T2>() where T1 : struct where T2 : struct
+    public IEnumerable<int> GetEntities<T1, T2>() where T1 : struct, IComponent where T2 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -179,7 +179,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3>() where T1 : struct where T2 : struct where T3 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -201,7 +201,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -224,7 +224,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -248,7 +248,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct where T6 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent where T6 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -273,7 +273,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct where T6 : struct where T7 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent where T6 : struct, IComponent where T7 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -299,7 +299,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct where T6 : struct where T7 : struct where T8 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent where T6 : struct, IComponent where T7 : struct, IComponent where T8 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -326,7 +326,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8, T9>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct where T6 : struct where T7 : struct where T8 : struct where T9 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8, T9>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent where T6 : struct, IComponent where T7 : struct, IComponent where T8 : struct, IComponent where T9 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -354,7 +354,7 @@ internal class EntityManager
         }
     }
 
-    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>() where T1 : struct where T2 : struct where T3 : struct where T4 : struct where T5 : struct where T6 : struct where T7 : struct where T8 : struct where T9 : struct where T10 : struct
+    public IEnumerable<int> GetEntities<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>() where T1 : struct, IComponent where T2 : struct, IComponent where T3 : struct, IComponent where T4 : struct, IComponent where T5 : struct, IComponent where T6 : struct, IComponent where T7 : struct, IComponent where T8 : struct, IComponent where T9 : struct, IComponent where T10 : struct, IComponent
     {
         var componentFlag1 = _componentRegistry.GetFlag<T1>();
         var componentFlag2 = _componentRegistry.GetFlag<T2>();
@@ -397,7 +397,7 @@ internal class EntityManager
     /// <exception cref="ComponentAlreadyExistsException">
     /// Thrown if the component already exists on the entity.
     /// </exception>
-    public void AddComponent<T>(int entityId, T component) where T : struct
+    public void AddComponent<T>(int entityId, T component) where T : struct, IComponent
     {
         if (!_signatureByEntityId.TryGetValue(entityId, out var oldSignature))
         {
@@ -420,7 +420,7 @@ internal class EntityManager
         }
 
         // Transfer components from old archetype to new archetype (old archetype must exist if the entity has the signature)
-        if (oldSignature != 0)
+        if (oldSignature != Bit256.Zero)
         {
             var oldArchetype = _archetypeBySignature[oldSignature];
             foreach (var item in oldArchetype.ComponentArrays)
@@ -473,7 +473,7 @@ internal class EntityManager
     /// <exception cref="ComponentNotFoundException">
     /// Thrown if the component does not exist on the entity.
     /// </exception>
-    public void UpdateComponent<T>(int entityId, T component) where T : struct
+    public void UpdateComponent<T>(int entityId, T component) where T : struct, IComponent
     {
         if (!_signatureByEntityId.TryGetValue(entityId, out var signature))
         {
@@ -505,7 +505,7 @@ internal class EntityManager
     /// <exception cref="ComponentNotFoundException">
     /// Thrown if the component does not exist on the entity.
     /// </exception>
-    public void RemoveComponent<T>(int entityId) where T : struct
+    public void RemoveComponent<T>(int entityId) where T : struct, IComponent
     {
         if (!_signatureByEntityId.TryGetValue(entityId, out var oldSignature))
         {
@@ -523,7 +523,7 @@ internal class EntityManager
         // Transfer components from old archetype to new archetype (old archetype must exist if the entity has the signature)
         var oldArchetype = _archetypeBySignature[oldSignature];
 
-        if (newSignature == 0)
+        if (newSignature == Bit256.Zero)
         {
             foreach (var componentArray in oldArchetype.ComponentArrays.Values)
             {
@@ -593,9 +593,9 @@ internal class EntityManager
     /// <exception cref="ComponentNotFoundException">
     /// Thrown if the component does not exist on the entity.
     /// </exception>
-    public T GetComponent<T>(int entityId) where T : struct
+    public T GetComponent<T>(int entityId) where T : struct, IComponent
     {
-        if (!_signatureByEntityId.TryGetValue(entityId, out ulong signature))
+        if (!_signatureByEntityId.TryGetValue(entityId, out Bit256 signature))
         {
             throw new EntityNotFoundException(entityId);
         }
@@ -621,7 +621,7 @@ internal class EntityManager
     /// <exception cref="EntityNotFoundException">
     /// Thrown if the entity does not exist.
     /// </exception>
-    public bool HasComponent<T>(int entityId) where T : struct
+    public bool HasComponent<T>(int entityId) where T : struct, IComponent
     {
         if (!_signatureByEntityId.TryGetValue(entityId, out var signature))
         {
@@ -639,7 +639,7 @@ internal class EntityManager
     /// <exception cref="EntityNotFoundException">
     /// Thrown if the entity does not exist.
     /// </exception>
-    public ulong GetSignature(int entityId)
+    public Bit256 GetSignature(int entityId)
     {
         if (!_signatureByEntityId.TryGetValue(entityId, out var signature))
         {

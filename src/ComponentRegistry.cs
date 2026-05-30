@@ -1,59 +1,69 @@
-﻿namespace ECS;
+﻿using ECS.Exceptions;
+
+namespace ECS;
 
 /// <summary>
-/// Manages the registration and bit flag assignment of up to 64 unique component types.
-/// Each component type is assigned a unique bit position within a 64-bit mask (ulong),
+/// Manages the registration and bit flag assignment of up to 256 unique component types.
+/// Each component type is assigned a unique bit position within a 256-bit mask,
 /// enabling efficient bitwise operations for entity-component systems.
 /// </summary>
 internal class ComponentRegistry
 {
     /// <summary>
-    /// The maximum number of unique component types supported (64).
+    /// The maximum number of unique component types supported.
     /// </summary>
-    public const int MaxComponents = sizeof(ulong) * 8;
+    public const int MaxComponents = 256;
 
-    private readonly Dictionary<Type, ulong> _typeToBit = new();
+    private readonly Dictionary<Type, Bit256> _typeToFlag = new();
     private int _nextBit = 0;
 
     /// <summary>
     /// Registers a new component type and assigns it a unique bit flag.
-    /// Throws an exception if the type is already registered or if the maximum is exceeded.
+    /// Throws a <see cref="ECS.Exceptions.ComponentAlreadyRegisteredException"/> if the type is already registered,
+    /// or a <see cref="ECS.Exceptions.MaxComponentsRegisteredException"/> if the maximum is exceeded.
     /// </summary>
     /// <typeparam name="T">The component type to register (must be a struct).</typeparam>
-    /// <returns>The unique bit flag assigned to the component type.</returns>
-    public ulong Register<T>() where T : struct
+    /// <returns>
+    /// The unique bit flag assigned to the component type as a <see cref="Bit256"/>,
+    /// with only one bit set.
+    /// </returns>
+    public Bit256 Register<T>() where T : struct
     {
         var type = typeof(T);
 
-        if (_typeToBit.ContainsKey(type))
+        if (_typeToFlag.ContainsKey(type))
         {
-            throw new InvalidOperationException($"Component type {type} is already registered.");
+            throw new ComponentAlreadyRegisteredException(type);
         }
 
         if (_nextBit >= MaxComponents)
         {
-            throw new InvalidOperationException($"Maximum of {MaxComponents} component types supported.");
+            throw new MaxComponentsRegisteredException(MaxComponents);
         }
 
         // Assign the next available bit to this component type
-        ulong bit = 1UL << _nextBit;
-        _nextBit++;
-        _typeToBit[type] = bit;
+        var flag = new Bit256();
+        byte bit = (byte)_nextBit++;
+        flag[bit] = true;
+        _typeToFlag[type] = flag;
 
-        return bit;
+        return flag;
     }
 
     /// <summary>
     /// Retrieves the bit flag assigned to a registered component type.
-    /// Throws an exception if the type is not registered.
+    /// Throws a <see cref="ECS.Exceptions.ComponentNotRegisteredException"/> if the type is not registered.
     /// </summary>
     /// <typeparam name="T">The component type to query (must be a struct).</typeparam>
-    /// <returns>The bit flag assigned to the component type.</returns>
-    public ulong GetFlag<T>() where T : struct
+    /// <returns>
+    /// The bit flag assigned to the component type as a <see cref="Bit256"/>,
+    /// with only one bit set.
+    /// </returns>
+    public Bit256 GetFlag<T>() where T : struct
     {
-        if (!_typeToBit.TryGetValue(typeof(T), out ulong flag))
+        if (!_typeToFlag.TryGetValue(typeof(T), out Bit256 flag))
         {
-            throw new InvalidOperationException($"Component type {typeof(T)} is not registered.");
+            throw new ComponentNotRegisteredException(typeof(T));
         }
 
         return flag;
@@ -64,10 +74,13 @@ internal class ComponentRegistry
     /// Returns true if the type is registered; otherwise, returns false.
     /// </summary>
     /// <typeparam name="T">The component type to query (must be a struct).</typeparam>
-    /// <param name="flag">The bit flag assigned to the component type, or 0 if not registered.</param>
+    /// <param name="flag">
+    /// The bit flag assigned to the component type as a <see cref="Bit256"/>,
+    /// with only one bit set, or zero if not registered.
+    /// </param>
     /// <returns>True if the type is registered; otherwise, false.</returns>
-    public bool TryGetFlag<T>(out ulong flag) where T : struct
+    public bool TryGetFlag<T>(out Bit256 flag) where T : struct
     {
-        return _typeToBit.TryGetValue(typeof(T), out flag);
+        return _typeToFlag.TryGetValue(typeof(T), out flag);
     }
 }

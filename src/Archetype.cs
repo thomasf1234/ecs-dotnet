@@ -14,7 +14,7 @@ internal class Archetype
     /// <summary>
     /// The unique signature (bitmask) representing the combination of component types for this archetype.
     /// </summary>
-    public ulong Signature { get; }
+    public Bit256 Signature { get; }
 
     /// <summary>
     /// The set of entity IDs that belong to this archetype.
@@ -31,7 +31,7 @@ internal class Archetype
     /// </summary>
     /// <param name="signature">The unique signature (bitmask) for the component combination.</param>
     /// <param name="maxEntities">The maximum number of entities supported by this archetype.</param>
-    public Archetype(ulong signature)
+    public Archetype(Bit256 signature)
     {
         Signature = signature;
         Entities = new HashSet<int>();

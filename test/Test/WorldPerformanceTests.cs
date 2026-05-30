@@ -5,19 +5,19 @@ namespace PerformanceTests
 {
     public class WorldPerformanceTests
     {
-        private struct Position { public int X, Y; }
-        private struct Velocity { public int X, Y; }
-        private struct Health { public int Value; }
+        private struct PositionComponent : IComponent { public int X, Y; }
+        private struct VelocityComponent : IComponent { public int X, Y; }
+        private struct HealthComponent : IComponent { public int Value; }
 
         // Simple system that moves entities by their velocity
         private class SimplePhysicsSystem : ECS.System
         {
             public override void Update(IWorld world, TimeContext timeContext)
             {
-                foreach (var id in world.GetEntities<Position, Velocity>())
+                foreach (var id in world.GetEntities<PositionComponent, VelocityComponent>())
                 {
-                    var pos = world.GetComponent<Position>(id);
-                    var vel = world.GetComponent<Velocity>(id);
+                    var pos = world.GetComponent<PositionComponent>(id);
+                    var vel = world.GetComponent<VelocityComponent>(id);
                     pos.X += vel.X;
                     pos.Y += vel.Y;
                     world.UpdateComponent(id, pos);
@@ -31,20 +31,20 @@ namespace PerformanceTests
             const int entityCount = 10000;
             const int frameCount = 1000;
             var world = new World(entityCount);
-            world.RegisterComponent<Position>();
-            world.RegisterComponent<Velocity>();
-            world.RegisterComponent<Health>();
+            world.RegisterComponent<PositionComponent>();
+            world.RegisterComponent<VelocityComponent>();
+            world.RegisterComponent<HealthComponent>();
             
 
             // Create entities and add components
             for (int i = 0; i < entityCount; i++)
             {
                 int id = world.CreateEntity();
-                world.AddComponent(id, new Position { X = i, Y = i });
+                world.AddComponent(id, new PositionComponent { X = i, Y = i });
                 if (i % 2 == 0)
-                    world.AddComponent(id, new Velocity { X = 1, Y = 1 });
+                    world.AddComponent(id, new VelocityComponent { X = 1, Y = 1 });
                 if (i % 3 == 0)
-                    world.AddComponent(id, new Health { Value = 100 });
+                    world.AddComponent(id, new HealthComponent { Value = 100 });
             }
 
             // Register the system

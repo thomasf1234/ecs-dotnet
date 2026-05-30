@@ -6,16 +6,16 @@ namespace PerformanceTests
     public class WorldPerformance2Tests
     {
         // Define 10 unique components
-        private struct C1 { public int Value; }
-        private struct C2 { public int Value; }
-        private struct C3 { public int Value; }
-        private struct C4 { public int Value; }
-        private struct C5 { public int Value; }
-        private struct C6 { public int Value; }
-        private struct C7 { public int Value; }
-        private struct C8 { public int Value; }
-        private struct C9 { public int Value; }
-        private struct C10 { public int Value; }
+        private struct C1 : IComponent { public int Value; }
+        private struct C2 : IComponent { public int Value; }
+        private struct C3 : IComponent { public int Value; }
+        private struct C4 : IComponent { public int Value; }
+        private struct C5 : IComponent { public int Value; }
+        private struct C6 : IComponent { public int Value; }
+        private struct C7 : IComponent { public int Value; }
+        private struct C8 : IComponent { public int Value; }
+        private struct C9 : IComponent { public int Value; }
+        private struct C10 : IComponent { public int Value; }
 
         // System definitions
         private class SystemC1C2 : ECS.System
